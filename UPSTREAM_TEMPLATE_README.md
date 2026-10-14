@@ -1,7 +1,7 @@
 # Full Stack FastAPI Template
 
-[![Test Docker Compose](../../actions/workflows/test-docker-compose.yml/badge.svg)](../../actions/workflows/test-docker-compose.yml)
-[![Test Backend](../../actions/workflows/test-backend.yml/badge.svg)](../../actions/workflows/test-backend.yml)
+[![Upstream Docker Compose tests](https://github.com/fastapi/full-stack-fastapi-template/actions/workflows/test-docker-compose.yml/badge.svg)](https://github.com/fastapi/full-stack-fastapi-template/actions/workflows/test-docker-compose.yml)
+[![Upstream backend tests](https://github.com/fastapi/full-stack-fastapi-template/actions/workflows/test-backend.yml/badge.svg)](https://github.com/fastapi/full-stack-fastapi-template/actions/workflows/test-backend.yml)
 
 ## Technology Stack and Features
 

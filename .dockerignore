@@ -12,3 +12,14 @@ assets/Arcana.vrm
 assets/Arcana.warudo
 assets/retired/AvatarSample_B.vrm
 assets/motions/PUBG_2PhutHon_VMD_JL_v2.0/
+.agents
+.claude
+AGENTS.md
+CODEX_START_HERE.md
+IMPLEMENTATION_STATUS.md
+harness
+docs/reports
+docs/README.md
+docs/0[0-9]_*.md
+docs/1[0-4]_*.md
+assets/motions/Quaternius_UAL1_Standard.zip

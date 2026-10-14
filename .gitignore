@@ -21,3 +21,19 @@ frontend/playwright/.cache/
 /assets/Arcana.warudo
 /assets/retired/AvatarSample_B.vrm
 /assets/motions/PUBG_2PhutHon_VMD_JL_v2.0/
+
+# Local AI-agent context, architecture notes, and validation evidence.
+/.agents/
+/.claude/
+/AGENTS.md
+/CODEX_START_HERE.md
+/IMPLEMENTATION_STATUS.md
+/harness/
+/docs/README.md
+/docs/0[0-9]_*.md
+/docs/1[0-4]_*.md
+/docs/reports/
+/.github/workflows/spec-pack.yml
+
+# Downloaded source archive; the runtime GLB remains versioned in frontend/public.
+/assets/motions/Quaternius_UAL1_Standard.zip

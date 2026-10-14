@@ -6,7 +6,7 @@ import pytest
 
 from app.live.director import run_fixture_scenario
 
-SCENARIO_ROOT = Path(__file__).resolve().parents[3] / "harness" / "scenarios"
+SCENARIO_ROOT = Path(__file__).resolve().parents[1] / "fixtures" / "director"
 SCENARIOS = [
     json.loads(path.read_text(encoding="utf-8"))
     for path in sorted(SCENARIO_ROOT.glob("*.json"))

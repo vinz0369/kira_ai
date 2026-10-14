@@ -116,7 +116,7 @@ uv run python scripts/probe_real_voice_chain.py
 uv run python scripts/benchmark_fpt_voice.py --repeats 2 --output-dir ../.tmp/fpt-voice-benchmark
 ```
 
-The synthetic-speech chain does not exercise browser microphone, Silero VAD, WebSocket delivery or OBS. The FPT benchmark measures input text to first decoded gTTS PCM, not end-to-end audible latency. See [FPT_MARKETPLACE_VALIDATION_REPORT.md](FPT_MARKETPLACE_VALIDATION_REPORT.md).
+The synthetic-speech chain does not exercise browser microphone, Silero VAD, WebSocket delivery or OBS. The FPT benchmark measures input text to first decoded gTTS PCM, not end-to-end audible latency.
 
 Run the real-network free-TTS benchmark with:
 
@@ -125,14 +125,13 @@ cd backend
 uv run python scripts/benchmark_free_tts.py --repeats 2 --include-edge
 ```
 
-The 2026-10-13 run measured gTTS at 10/10 successes, P50 333 ms and P95 441 ms to first decoded PCM. Experimental Edge reliability was 40% for Hoài My and 80% for Nam Minh, with much higher tail latency. Exported WAV files require human listening before claiming naturalness or pronunciation quality; see [FREE_TTS_VALIDATION_REPORT.md](FREE_TTS_VALIDATION_REPORT.md).
+The 2026-10-13 run measured gTTS at 10/10 successes, P50 333 ms and P95 441 ms to first decoded PCM. Experimental Edge reliability was 40% for Hoài My and 80% for Nam Minh, with much higher tail latency. Exported WAV files require human listening before claiming naturalness or pronunciation quality.
 
 Before spending provider quota, open `/settings/diagnostics`. It shows a backend-only preflight (without keys, tokens, or credential paths), checks browser microphone support, performs an opt-in local mic-level test, loads metrics for a real session, calculates a 3-hour run-rate estimate after at least 60 seconds, and exports an operator evidence JSON. `PREFLIGHT_ONLY` is readiness information—not proof that any provider or OBS worked.
 
 ## Verify
 
 ```powershell
-python harness/validate_pack.py
 cd backend
 uv run ruff check app tests
 uv run mypy app
@@ -153,22 +152,18 @@ If Docker Desktop is unavailable on Windows, run the official Mailpit binary dir
 
 Manual OBS desktop verification is documented in [docs/15_MANUAL_OBS_TEST_GUIDE.md](docs/15_MANUAL_OBS_TEST_GUIDE.md). Automated Chromium checks cover transparency, audio ownership, exactly-once playback, talking/idle state, cancellation, and safe reconnect, but they are not a substitute for an OBS recording test.
 
-Avatar setup verification (2026-10-14): backend **159/159**, focused Playwright **3/3**, frontend lint/build, Ruff, mypy, ty, and documentation harness passed. The full Playwright runner was not run because its reserved ports were occupied. Camera framing and zoom were saved and reloaded in Chromium; OBS still needs a safe backend restart after the currently ACTIVE preview session ends before those new settings are available to its live page. Exact details are in [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md).
-
-Latest local avatar verification (2026-10-14): backend Pytest **158 passed**, full isolated Playwright **75/75 passed** before the final reconnect-state UI adjustment, and the focused live-character suite **3/3 passed** after that adjustment. Lint, production build, type/security checks and the documentation harness passed. Arcana is local-only because its embedded license prohibits redistribution and commercial use; public/deployed builds use the procedural fallback until suitable rights are obtained. Real OBS verification is still pending. See [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) for exact test provenance and [assets/LICENSE_REGISTER.md](assets/LICENSE_REGISTER.md) for model/animation terms.
+Arcana is local-only because its embedded license prohibits redistribution and commercial use; public/deployed builds use the procedural fallback until suitable rights are obtained. See [assets/LICENSE_REGISTER.md](assets/LICENSE_REGISTER.md) for model and animation terms. Real OBS verification still requires the manual checklist.
 
 If Start reports `Another live session is active`, open `/live` and return to that control room. Creating a draft does not replace a running session. If YouTube chat shows `chat_disabled_or_ended`, the video saved in that session may have ended: **Reconnect ingest only retries the same chat**. In **Chat của livestream YouTube → Đổi sang livestream đang phát**, choose an active broadcast from the connected channel, or paste its watch/share URL from YouTube Studio and click **Kiểm tra link**. Then confirm **Gắn chat của video này vào phiên**. The backend rechecks channel ownership, live status and active chat before switching only YouTube ingestion; mic and OBS URL stay in place. If there is no active broadcast, the video has ended, chat is unavailable, or the channel differs, correct that in YouTube Studio or Google Connections; the app will not guess a chat ID. Never paste stream keys or OAuth tokens—only the public video URL.
 
-The Phase 1 stabilization baseline passed 78 backend tests and 63 Playwright tests. Phase 2 passed 95 backend tests and 64 Playwright tests. Phase 3 implementation passed 102 backend tests and 64 Playwright tests. The 2026-10-13 free-TTS extension passed 118 backend tests and 66 Playwright tests. The 2026-10-14 FPT integration passed 125 backend tests and 66 Playwright tests. The subsequent guided real-microphone attempt passed **126 isolated backend tests and 67 isolated Playwright tests**; its human/OBS results and unresolved checks are in [REAL_MIC_OBS_VALIDATION_REPORT.md](REAL_MIC_OBS_VALIDATION_REPORT.md). Earlier commands and external checks are recorded in [FPT_MARKETPLACE_VALIDATION_REPORT.md](FPT_MARKETPLACE_VALIDATION_REPORT.md), [FREE_TTS_VALIDATION_REPORT.md](FREE_TTS_VALIDATION_REPORT.md) and [PHASE3_REAL_WORLD_VALIDATION_REPORT.md](PHASE3_REAL_WORLD_VALIDATION_REPORT.md).
-
 ## Scope
 
-- `MOCK_TESTED`: YouTube fixtures, director priorities, FakeLLM/FakeTTS, Silero integration build, binary audio protocol, simulated streaming/cancellation/reconnect behavior, usage accounting, and the local Arcana VRM overlay with procedural load-failure fallback (see current implementation status for exact test runs).
-- `PREFLIGHT_TESTED`: provider configuration is reported without exposing secrets. The connected YouTube channel, broadcast discovery and chat receipt ingestion were subsequently exercised with real OAuth; the current evidence and limits are in `IMPLEMENTATION_STATUS.md`. Real Super Chat/Super Sticker delivery remains unverified.
+- `MOCK_TESTED`: YouTube fixtures, director priorities, FakeLLM/FakeTTS, Silero integration build, binary audio protocol, simulated streaming/cancellation/reconnect behavior, usage accounting, and the local Arcana VRM overlay with procedural load-failure fallback.
+- `PREFLIGHT_TESTED`: provider configuration is reported without exposing secrets. Real Super Chat/Super Sticker delivery remains unverified.
 - `REAL_PROVIDER_NETWORK_TESTED`: Deepgram streaming socket, one synthetic Vietnamese speech -> Deepgram -> FPT -> gTTS chain, and 10 FPT -> gTTS text turns. Timing is provider-side text/synthetic input to PCM, not audible OBS end-to-end.
 - `REAL_TTS_NETWORK_TESTED`: separate keyless gTTS and experimental Edge synthesis, PCM decode, signal integrity, first-audio timing, reliability, and cancellation dispatch.
 - `PARTIAL_REAL_MIC_OPERATOR_REPORTED`: browser microphone/VAD sent Vietnamese speech to Deepgram, three addressed turns reached FPT/gTTS and browser overlay playback ACK, and the operator saw a character in OBS and reported an affirmative audio response. Sample count is too small for reliable P50/P95; browser ACK is not OBS-audible latency. One proper name was recognized as “Pira”.
 - `NOT_TESTED`: formal human-rated TTS quality and STT word-error rate, credentialed OpenAI/Google TTS, OBS-audible P50/P95, real Google consent/channel traffic, manual OBS recording/audio routing and individual barge-in/mute/stop/reconnect observations.
 - Phase 4 has not been started.
 
-See [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md), [PHASE3_REAL_WORLD_VALIDATION_REPORT.md](PHASE3_REAL_WORLD_VALIDATION_REPORT.md), [PHASE3_TEST_REPORT.md](PHASE3_TEST_REPORT.md), [docs/17_PHASE3_VOICE_RUNBOOK.md](docs/17_PHASE3_VOICE_RUNBOOK.md), [PHASE2_TEST_REPORT.md](PHASE2_TEST_REPORT.md), and [UPSTREAM_TEMPLATE_README.md](UPSTREAM_TEMPLATE_README.md) for details.
+See the [OBS guide](docs/15_MANUAL_OBS_TEST_GUIDE.md), [YouTube runbook](docs/16_PHASE2_YOUTUBE_RUNBOOK.md), [voice-provider runbook](docs/17_PHASE3_VOICE_RUNBOOK.md), and [upstream template README](UPSTREAM_TEMPLATE_README.md) for operational details.

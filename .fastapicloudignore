@@ -1,2 +1,13 @@
 .env
 !backend/app/frontend/
+.agents/
+.claude/
+AGENTS.md
+CODEX_START_HERE.md
+IMPLEMENTATION_STATUS.md
+harness/
+docs/reports/
+docs/README.md
+docs/0[0-9]_*.md
+docs/1[0-4]_*.md
+assets/motions/Quaternius_UAL1_Standard.zip
