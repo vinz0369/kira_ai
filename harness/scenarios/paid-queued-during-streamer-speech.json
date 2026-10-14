@@ -1,0 +1,28 @@
+{
+  "id": "paid-queued-during-streamer-speech",
+  "description": "paid event queued, not interrupt human",
+  "initial_state": {
+    "session": "active",
+    "ai_muted": false,
+    "ai_speaking": false,
+    "streamer_speaking": true
+  },
+  "events": [
+    {
+      "type": "youtube.superchat",
+      "payload": {
+        "provider_message_id": "super-1",
+        "author_name": "Minh",
+        "text": "cảm ơn nhé",
+        "amount_micros": 50000000000,
+        "currency": "VND"
+      }
+    }
+  ],
+  "expect": {
+    "decision": "queue",
+    "priority": "P2",
+    "interrupt_streamer": false,
+    "paid_event_saved": true
+  }
+}

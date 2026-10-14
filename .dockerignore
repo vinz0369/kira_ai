@@ -1,0 +1,14 @@
+.git
+**/__pycache__
+**/.venv
+backend/htmlcov
+frontend/blob-report
+frontend/dist
+frontend/node_modules
+frontend/playwright-report
+frontend/test-results
+node_modules
+assets/Arcana.vrm
+assets/Arcana.warudo
+assets/retired/AvatarSample_B.vrm
+assets/motions/PUBG_2PhutHon_VMD_JL_v2.0/

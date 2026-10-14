@@ -1,0 +1,36 @@
+{
+  "id": "paid-dedup",
+  "description": "duplicate provider message must not double thank-you",
+  "initial_state": {
+    "session": "active",
+    "ai_muted": false,
+    "ai_speaking": false,
+    "streamer_speaking": false
+  },
+  "events": [
+    {
+      "type": "youtube.superchat",
+      "payload": {
+        "provider_message_id": "super-2",
+        "author_name": "Huy",
+        "text": "hello",
+        "amount_micros": 1000000000,
+        "currency": "VND"
+      }
+    },
+    {
+      "type": "youtube.superchat",
+      "payload": {
+        "provider_message_id": "super-2",
+        "author_name": "Huy",
+        "text": "hello",
+        "amount_micros": 1000000000,
+        "currency": "VND"
+      }
+    }
+  ],
+  "expect": {
+    "paid_event_unique": 1,
+    "duplicate_dropped": true
+  }
+}

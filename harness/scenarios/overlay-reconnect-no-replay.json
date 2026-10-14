@@ -1,0 +1,23 @@
+{
+  "id": "overlay-reconnect-no-replay",
+  "description": "overlay should receive latest state, never stale speech",
+  "initial_state": {
+    "session": "active",
+    "ai_muted": false,
+    "ai_speaking": false,
+    "streamer_speaking": false
+  },
+  "events": [
+    {
+      "type": "overlay.connected",
+      "payload": {
+        "connection_id": "conn-2",
+        "client_version": "mock-1"
+      }
+    }
+  ],
+  "expect": {
+    "snapshot_sent": true,
+    "old_audio_replayed": false
+  }
+}

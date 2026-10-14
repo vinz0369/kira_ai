@@ -1,0 +1,24 @@
+{
+  "id": "direct-voice-priority",
+  "description": "direct call to AI wins when stream active",
+  "initial_state": {
+    "session": "active",
+    "ai_muted": false,
+    "ai_speaking": false,
+    "streamer_speaking": false
+  },
+  "events": [
+    {
+      "type": "streamer.transcript.final",
+      "payload": {
+        "turn_id": "turn-1",
+        "text": "Kira, mày nghĩ sao?",
+        "confidence": 0.95
+      }
+    }
+  ],
+  "expect": {
+    "decision": "respond",
+    "priority": "P1"
+  }
+}

@@ -1,0 +1,127 @@
+services:
+
+  proxy:
+    image: traefik:v3.7
+    volumes:
+      # Add Docker as a mounted volume, so that Traefik can read the labels of other services
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      # Enable Docker in Traefik, so that it reads labels from Docker services
+      - --providers.docker
+      # Do not expose all Docker services, only the ones explicitly exposed
+      - --providers.docker.exposedbydefault=false
+      # Create an entrypoint "http" listening on port 80
+      - --entrypoints.http.address=:80
+      # Enable the access log, with HTTP requests
+      - --accesslog
+      # Enable the Traefik log, for configurations and errors
+      - --log
+
+  db:
+    image: postgres:18
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d app"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    volumes:
+      - app-db-data:/var/lib/postgresql
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Variable not set}
+      - POSTGRES_DB=app
+
+  redis:
+    image: redis:8.2-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  adminer:
+    image: adminer
+    depends_on:
+      - db
+    environment:
+      - ADMINER_DESIGN=pepa-linha-dark
+    labels:
+      # Enable Traefik for this service
+      - traefik.enable=true
+      # Route HTTP traffic for the Adminer subdomain
+      - traefik.http.routers.adminer-http.rule=Host(`adminer.${DOMAIN:-localhost}`)
+      - traefik.http.routers.adminer-http.entrypoints=http
+      # Define the port inside of the Docker service to use
+      - traefik.http.services.adminer.loadbalancer.server.port=8080
+
+  backend:
+    image: backend:latest
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+      redis:
+        condition: service_healthy
+        restart: true
+    environment:
+      PROJECT_NAME: ${PROJECT_NAME:?Variable not set}
+      SECRET_KEY: ${SECRET_KEY:?Variable not set}
+      FIRST_SUPERUSER: ${FIRST_SUPERUSER:?Variable not set}
+      FIRST_SUPERUSER_PASSWORD: ${FIRST_SUPERUSER_PASSWORD:?Variable not set}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      EMAILS_FROM_EMAIL: ${EMAILS_FROM_EMAIL}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?Variable not set}@db:5432/app
+      REDIS_URL: redis://redis:6379/0
+      MOCK_MODE: ${MOCK_MODE:-true}
+      WS_ALLOWED_ORIGINS: ${WS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:8000}
+      DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_OAUTH_REDIRECT_URI: ${GOOGLE_OAUTH_REDIRECT_URI:-http://localhost:8000/api/v1/youtube/oauth/callback}
+      YOUTUBE_SCOPES: ${YOUTUBE_SCOPES:-https://www.googleapis.com/auth/youtube.readonly}
+      YOUTUBE_INGEST_TRANSPORT: ${YOUTUBE_INGEST_TRANSPORT:-stream}
+      YOUTUBE_RECONNECT_MAX_SECONDS: ${YOUTUBE_RECONNECT_MAX_SECONDS:-30}
+      DEEPGRAM_API_KEY: ${DEEPGRAM_API_KEY:-}
+      DEEPGRAM_MODEL: ${DEEPGRAM_MODEL:-nova-3-general}
+      DEEPGRAM_LANGUAGE: ${DEEPGRAM_LANGUAGE:-vi}
+      DEEPGRAM_ENDPOINTING_MS: ${DEEPGRAM_ENDPOINTING_MS:-300}
+      DEEPGRAM_UTTERANCE_END_MS: ${DEEPGRAM_UTTERANCE_END_MS:-900}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-5-mini}
+      OPENAI_MAX_OUTPUT_TOKENS: ${OPENAI_MAX_OUTPUT_TOKENS:-180}
+      GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS:-}
+      GOOGLE_TTS_LOCATION: ${GOOGLE_TTS_LOCATION:-global}
+      GOOGLE_TTS_VOICE_ID: ${GOOGLE_TTS_VOICE_ID:-vi-VN-Chirp3-HD-Leda}
+      GOOGLE_TTS_LANGUAGE: ${GOOGLE_TTS_LANGUAGE:-vi-VN}
+      GOOGLE_TTS_SAMPLE_RATE_HZ: ${GOOGLE_TTS_SAMPLE_RATE_HZ:-24000}
+      VOICE_STT_USD_PER_MINUTE: ${VOICE_STT_USD_PER_MINUTE:-}
+      VOICE_LLM_INPUT_USD_PER_MILLION_TOKENS: ${VOICE_LLM_INPUT_USD_PER_MILLION_TOKENS:-}
+      VOICE_LLM_OUTPUT_USD_PER_MILLION_TOKENS: ${VOICE_LLM_OUTPUT_USD_PER_MILLION_TOKENS:-}
+      VOICE_TTS_USD_PER_MILLION_CHARACTERS: ${VOICE_TTS_USD_PER_MILLION_CHARACTERS:-}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    labels:
+      # Enable Traefik for this service
+      - traefik.enable=true
+
+      # Define the port inside of the Docker service to use
+      - traefik.http.services.backend.loadbalancer.server.port=8000
+
+      # Route HTTP traffic for this domain
+      - traefik.http.routers.backend-http.rule=Host(`${DOMAIN:-localhost}`)
+      - traefik.http.routers.backend-http.entrypoints=http
+
+volumes:
+  app-db-data:
